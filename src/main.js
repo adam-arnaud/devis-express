@@ -27,6 +27,21 @@ document.querySelector('#app').innerHTML = `
 
         <label for="pages">Nombre de pages</label>
         <input type="number" id="pages" min="1" value="1">
+       
+<div class="options">
+  <label>Options supplémentaires</label>
+  <label><input type="checkbox" value="150" class="option"> Formulaire de contact (+150 €)</label>
+  <label><input type="checkbox" value="250" class="option"> Blog / actualités (+250 €)</label>
+  <label><input type="checkbox" value="400" class="option"> Réservation en ligne (+400 €)</label>
+  <label><input type="checkbox" value="300" class="option"> Optimisation SEO (+300 €)</label>
+  <label><input type="checkbox" value="120" class="option"> Hébergement 1 an (+120 €)</label>
+  <label><input type="checkbox" value="20" class="option"> Nom de domaine (+20 €)</label>
+  <label><input type="checkbox" value="80" class="option"> Google Maps (+80 €)</label>
+  <label><input type="checkbox" value="200" class="option"> Galerie photos (+200 €)</label>
+  <label><input type="checkbox" value="500" class="option"> Multi-langue (+500 €)</label>
+</div>
+
+
 
         <button type="button" id="calculate-btn">
           Calculer le devis
@@ -95,8 +110,13 @@ button.addEventListener('click', () => {
   }
 
   const extraPages = pages - 1
-  const total = basePrice + (extraPages * 150)
   const extraPagesPrice = extraPages * 150
+  const selectedOptions = document.querySelectorAll('.option:checked')
+  let optionsTotal = 0
+  selectedOptions.forEach((option) => {
+    optionsTotal += Number(option.value)
+  })
+  const total = basePrice + extraPagesPrice + optionsTotal
 
   const clientName = document.querySelector('#client-name').value || 'Client non renseigné'
 
@@ -104,15 +124,26 @@ button.addEventListener('click', () => {
   localStorage.setItem('siteType', siteType)
   localStorage.setItem('pages', pages)
 
-  result.innerHTML = `
-  <strong>Client :</strong> ${clientName}<br>
-  <strong>Type de site :</strong> ${siteSelect.options[siteSelect.selectedIndex].text}<br>
-  <strong>Nombre de pages :</strong> ${pages}<br><br>
+ let optionsDetails = ''
 
-  <strong>Prix de base :</strong> ${basePrice} €<br>
-  <strong>Pages supplémentaires :</strong> ${extraPages} × 150 € = ${extraPagesPrice} €<br><br>
+selectedOptions.forEach((option) => {
+  const optionText = option.parentElement.textContent.trim()
+  optionsDetails += `${optionText}<br>`
+})
 
-  <strong>Total estimé :</strong> ${total} €
+result.innerHTML = `
+  Client : ${clientName}<br>
+  Type de site : ${siteType}<br>
+  Nombre de pages : ${pages}<br><br>
+
+  Prix de base : ${basePrice} €<br>
+  Pages supplémentaires : ${extraPages} x 150 € = ${extraPagesPrice} €<br><br>
+
+  <strong>Options :</strong><br>
+  ${optionsDetails}
+  <br>
+
+  <strong>Total estimé : ${total} €</strong>
 `
 })
 
@@ -138,15 +169,15 @@ pdfButton.addEventListener('click', () => {
   const pages = document.querySelector('#pages').value
 
   const doc = new jsPDF()
- doc.addImage(logo, 'PNG', 122, 10, 26, 26)
+  doc.addImage(logo, 'PNG', 122, 10, 26, 26)
 
-doc.setFontSize(14)
-doc.setFont(undefined, 'bold')
-doc.text('ARNAUD ADAM', 140, 20)
+  doc.setFontSize(14)
+  doc.setFont(undefined, 'bold')
+  doc.text('ARNAUD ADAM', 140, 20)
 
-doc.setFontSize(8)
-doc.setFont(undefined, 'normal')
-doc.text('Création de sites web & solutions digitales', 140, 26)
+  doc.setFontSize(8)
+  doc.setFont(undefined, 'normal')
+  doc.text('Création de sites web & solutions digitales', 140, 26)
 
   doc.setFontSize(8)
   doc.setFont(undefined, 'normal')
@@ -195,11 +226,11 @@ doc.text('Création de sites web & solutions digitales', 140, 26)
   doc.text('Ce devis est une proposition commerciale pouvant être ajustée selon les besoins du projet.', 20, 170)
   doc.setFontSize(10)
 
-doc.text('Validité du devis : 30 jours à compter de la date d’émission.', 20, 182)
+  doc.text('Validité du devis : 30 jours à compter de la date d’émission.', 20, 182)
 
-doc.text('Délai estimatif de réalisation : 2-4 semaines après validation.', 20, 189)
+  doc.text('Délai estimatif de réalisation : 2-4 semaines après validation.', 20, 189)
 
-doc.text('Conditions de paiement : 30 % d’acompte à la commande, solde à la livraison.', 20, 196)
+  doc.text('Conditions de paiement : 30 % d’acompte à la commande, solde à la livraison.', 20, 196)
   doc.setGState(new doc.GState({ opacity: 0.14 }))
   doc.addImage(logo, 'PNG', 0, 190, 95, 95)
   doc.setGState(new doc.GState({ opacity: 1 }))
