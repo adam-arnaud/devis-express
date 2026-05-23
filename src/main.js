@@ -1,6 +1,8 @@
 import './style.css'
 import logo from './assets/logo-symbol.png'
 import { generatePDF } from './pdf/pdfGenerator'
+import { saveQuote, getQuotes } from './storage/quoteStorage'
+
 
 document.querySelector('#app').innerHTML = `
   <div class="app">
@@ -54,16 +56,42 @@ document.querySelector('#app').innerHTML = `
 
       </form>
 
-      <section class="result">
-        <h2>Résumé du devis</h2>
-        <p>Le devis apparaîtra ici.</p>
-      </section>
+      <div>
+  <section class="result">
+    <h2>Résumé du devis</h2>
+    <p>Le devis apparaîtra ici.</p>
+  </section>
+
+  <section class="history">
+    <h2>Historique des devis</h2>
+    <ul id="quote-history">
+      <li>Aucun devis enregistré.</li>
+    </ul>
+  </section>
+</div>
     </main>
   </div>
 `
 
 const button = document.querySelector('#calculate-btn')
 const result = document.querySelector('.result p')
+const historyList = document.querySelector('#quote-history')
+function renderHistory() {
+  const quotes = getQuotes()
+
+  if (quotes.length === 0) {
+    historyList.innerHTML = '<li>Aucun devis enregistré.</li>'
+    return
+  }
+
+  historyList.innerHTML = ''
+
+  quotes.forEach((quote) => {
+    const li = document.createElement('li')
+    li.textContent = `${quote.date} - ${quote.clientName} - ${quote.total} €`
+    historyList.appendChild(li)
+  })
+}
 
 const savedClientName = localStorage.getItem('clientName')
 const savedSiteType = localStorage.getItem('siteType')
@@ -128,6 +156,14 @@ button.addEventListener('click', () => {
   selectedOptions.forEach((option) => {
     const optionText = option.parentElement.textContent.trim()
     optionsDetails += `${optionText}<br>`
+  })
+
+  saveQuote({
+    clientName,
+    siteType,
+    pages,
+    total,
+    date: new Date().toLocaleDateString('fr-BE')
   })
 
   result.innerHTML = `
